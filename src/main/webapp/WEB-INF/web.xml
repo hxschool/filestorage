@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <context-param>
+        <description>
+            Key of the system property that should specify the root directory of this web app. 
+            Applied by WebAppRootListener or Log4jConfigListener.
+        </description>
+        <param-name>webAppRootKey</param-name>
+        <param-value>storage.root</param-value>
+    </context-param>
+    <context-param>
+        <description>
+            Location of the Log4J config file, for initialization and refresh checks.
+            Applied by Log4jConfigListener.
+        </description>
+        <param-name>log4jConfigLocation</param-name>
+        <param-value>classpath:log4j.properties</param-value>
+    </context-param>
+    <context-param>
+        <description>
+            Location of the XML file that defines the root application context.
+            Applied by ContextLoaderServlet.
+        </description>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            /WEB-INF/applicationContext-web.xml
+        </param-value>
+    </context-param>
+    <listener>
+        <description>
+            Bootstrap listener for custom log4j initialization in a web environment.
+            This listener should be registered before ContextLoaderListener in web.xml
+            when using custom log4j initialization.
+        </description>
+        <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+    </listener>
+    <listener>
+        <description>
+            Loads the root application context of this web app at startup,
+            by default from "/WEB-INF/applicationContext.xml".
+
+            Use WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
+            to access it anywhere in the web application, outside of the framework.
+
+            The root context is the parent of all servlet-specific contexts.
+            This means that its beans are automatically available in these child contexts,
+            both for getBean(name) calls and (external) bean references.            
+        </description>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <servlet>
+        <description>
+            Spring web MVC servlet that dispatches requests to registered handlers.
+            Has its own application context, by default defined in "{servlet-name}-servlet.xml",
+            i.e. "zonlolo-servlet.xml" in this case.
+
+            A web app can contain any number of such servlets.
+            Note that this web app has a shared root application context, serving as parent
+            of all DispatcherServlet contexts.
+        </description>
+        <servlet-name>storage</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:storage-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>storage</servlet-name>
+        <url-pattern>/storage/*</url-pattern>
+    </servlet-mapping>
+
+    
+    <filter>
+        <description>filter to set the encoding, the encoding should be consistent in all layers of the application</description>
+        <filter-name>Set Character Encoding</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>Set Character Encoding</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter>
+        <description>
+            While HTTP defines four methods, HTML only supports two: GET and POST.
+            Fortunately, there are two possible workarounds:
+            you can either use JavaScript to do your PUT or DELETE,
+            or simply do a POST with the 'real' method as an additional parameter (modeled as a hidden input field in an HTML form).
+            This latter trick is what the HiddenHttpMethodFilter does.
+            Simply add this filter to your web.xml, and a POST with a hidden _method parameter
+            will be converted into the corresponding HTTP method request.            
+        </description>
+        <filter-name>httpMethodFilter</filter-name>
+        <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>httpMethodFilter</filter-name>
+        <servlet-name>storage</servlet-name>
+    </filter-mapping>
+
+    <session-config>
+        <session-timeout>
+            10
+        </session-timeout>
+    </session-config>
+    <welcome-file-list>
+        <!-- use server side redirect technique.
+        note that this is relative path because at this time it is still in standard servlet container -->
+        <welcome-file>index.jsp</welcome-file>
+        <!-- use javascript for redirect to Spring MVC -->
+        <!--<welcome-file>welcome.html</welcome-file>-->
+    </welcome-file-list>
+</web-app>
