@@ -117,6 +117,7 @@ public class StorageController {
        		 	logger.debug("upload file {} to {}", name, saveFile);
                 logger.debug("Incomming REST request uploadImage with name={} SUCCESS!", name);
             } catch (Exception e) {
+            	e.printStackTrace();
                 logger.error("upload file {} failed", name, e);
                 map.put("status", "99999999");
                 map.put("message", "上传失败");
