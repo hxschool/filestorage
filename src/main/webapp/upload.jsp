@@ -7,7 +7,7 @@
 <title>Insert title here</title>
 </head>
 <body>
-<form action="storage/upload" method="post" enctype="multipart/form-data">
+<form action="upload" method="post" enctype="multipart/form-data">
 <input type="file" name="file" />
 文件相对路径：<input type="text"  name="name" ><br/>
 
