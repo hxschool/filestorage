@@ -93,7 +93,7 @@ public class StorageController {
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public BooleanResponse uploadImage(@RequestParam("name") String name,
-            @RequestParam("file") MultipartFile file, @RequestParam("contentType") String contentType) {
+            @RequestParam("file") MultipartFile file, @RequestParam(value = "contentType", required = false) String contentType) {
 
         logger.debug("Incomming REST request uploadImage with name={}", name);
 
