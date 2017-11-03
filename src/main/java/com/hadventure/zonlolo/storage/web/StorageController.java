@@ -6,6 +6,10 @@
 package com.hadventure.zonlolo.storage.web;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
@@ -17,16 +21,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hadventure.zonlolo.storage.StorageConstant;
 import com.hadventure.zonlolo.storage.exception.EntityNotFoundException;
 import com.hadventure.zonlolo.storage.exception.NotFoundException;
-import com.hadventure.zonlolo.storage.rest.BooleanResponse;
 import com.hadventure.zonlolo.storage.service.StorageService;
 import com.mongodb.gridfs.GridFSDBFile;
 
@@ -43,7 +48,7 @@ public class StorageController {
     public static final String DEFAULT_AUDIO_TYPE = StorageConstant.MIME_AUDIO_WAV;
     public static final String DEFAULT_ARCHIVE_TYPE = StorageConstant.MIME_ARCHIVE_ZIP;
     private StorageService storageService;
-
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
     @Resource
     @Required
     @Qualifier("blobStorageServiceImpl")
@@ -53,8 +58,8 @@ public class StorageController {
 
     /**
      * http://localhost:9080/storage/storage/image/0bfdf0fa03e6e53779171f5931b19d4e.jpg
-     * 
-     * @param name
+     * 59fc497c338f2515af06b876
+     * @param name59fc497c338f2515af06b876
      * @param contentType
      * @param resp
      */
@@ -92,30 +97,42 @@ public class StorageController {
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public BooleanResponse uploadImage(@RequestParam("name") String name,
+    @ResponseBody
+    public Map<String,String> uploadImage(@RequestParam("name") String name,
             @RequestParam("file") MultipartFile file, @RequestParam(value = "contentType", required = false) String contentType) {
-
+    	Map<String,String> map = new HashMap<String,String>();
+    	if(StringUtils.isEmpty(contentType)) {
+    		contentType = file.getContentType();
+    	}
+    	
+    	if(StringUtils.isEmpty(name)) {
+    		name = sdf.format(System.currentTimeMillis()).concat(UUID.randomUUID().toString().replaceAll("\\-", ""));
+    	}
+    	
         logger.debug("Incomming REST request uploadImage with name={}", name);
 
         if (validate(file)) {
             try (InputStream is = file.getInputStream()) {
-
-                String saveFile = storageService.save(is, contentType, name);
-
-                logger.debug("upload file {} to {}", name, saveFile);
+            	String saveFile = storageService.save(is, contentType, name);
+       		 	logger.debug("upload file {} to {}", name, saveFile);
                 logger.debug("Incomming REST request uploadImage with name={} SUCCESS!", name);
-
             } catch (Exception e) {
                 logger.error("upload file {} failed", name, e);
-                return new BooleanResponse(Boolean.FALSE);
+                map.put("status", "99999999");
+                map.put("message", "上传失败");
+                return map;
             }
-
-            return new BooleanResponse(Boolean.TRUE);
+            map.put("status", "00000000");
+            map.put("message", "上传成功");
+            map.put("name", name);
+            map.put("url", "http://images.greathiit.com/image/".concat(name));
+            return map;
 
         } else {
             logger.info("Incomming REST request uploadImage with name={} FAILED!", name);
-
-            return new BooleanResponse(Boolean.FALSE);
+            map.put("status", "99999999");
+            map.put("message", "上传失败");
+            return map;
         }
     }
 
