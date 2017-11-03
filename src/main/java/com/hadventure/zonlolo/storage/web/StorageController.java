@@ -126,7 +126,7 @@ public class StorageController {
             map.put("status", "00000000");
             map.put("message", "上传成功");
             map.put("name", name);
-            map.put("url", "http://images.greathiit.com/image/".concat(name));
+            map.put("url", "http://photo.greathiit.com/image/".concat(name));
             return map;
 
         } else {
