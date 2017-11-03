@@ -30,7 +30,7 @@
     <bean id="jsonConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
         <property name="supportedMediaTypes" value="application/json" />
     </bean>
-
+<mvc:resources mapping="/*.html" location="/" />
     <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
         <property name="order" value="1" />
         <property name="favorPathExtension" value="true" />

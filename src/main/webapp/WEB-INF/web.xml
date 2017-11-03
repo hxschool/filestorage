@@ -66,10 +66,15 @@
         </init-param>
         <load-on-startup>3</load-on-startup>
     </servlet>
+	<servlet-mapping>
+		<servlet-name>jsp</servlet-name>
+		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
     <servlet-mapping>
         <servlet-name>storage</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/</url-pattern>
     </servlet-mapping>
+
 
     
     <filter>
