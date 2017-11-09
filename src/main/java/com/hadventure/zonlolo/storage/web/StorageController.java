@@ -47,6 +47,7 @@ public class StorageController {
     public static final String DEFAULT_IMAGE_TYPE = StorageConstant.MIME_IMAGE_JPG;
     public static final String DEFAULT_AUDIO_TYPE = StorageConstant.MIME_AUDIO_WAV;
     public static final String DEFAULT_ARCHIVE_TYPE = StorageConstant.MIME_ARCHIVE_ZIP;
+    public static final String DEFAULT_EXCEL_TYPE = StorageConstant.MIME_EXCEL;
     private StorageService storageService;
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
     @Resource
@@ -76,6 +77,25 @@ public class StorageController {
         logger.debug("Incomming REST request getImage with name={} DONE!", name);
     }
 
+    /**
+     * http://localhost:9080/storage/storage/audio/0bfdf0fa03e6e53779171f5931b19d4e.wav
+     * 
+     * @param name
+     * @param contentType
+     * @param resp
+     */
+    @RequestMapping(value = "/excel/{name:.+}", method = RequestMethod.GET)
+    // :.+ 解决 .wav 扩展名问题
+    public void getExcel(
+            @PathVariable String name,
+            @RequestParam(required = false, defaultValue = DEFAULT_EXCEL_TYPE) String contentType,
+            HttpServletResponse resp) {
+
+        logger.debug("Incomming REST request getExcel with name={}", name);
+        retrieveBinaryContent(resp, contentType, name, false);
+
+        logger.debug("Incomming REST request getExcel with name={} DONE!", name);
+    }
     /**
      * http://localhost:9080/storage/storage/audio/0bfdf0fa03e6e53779171f5931b19d4e.wav
      * 

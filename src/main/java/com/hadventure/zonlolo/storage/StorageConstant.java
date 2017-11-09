@@ -22,4 +22,5 @@ public class StorageConstant {
     // audio mime type
     public static final String MIME_AUDIO_WAV = "audio/x-wav";
     public static final String MIME_ARCHIVE_ZIP = "application/zip";
+    public static final String MIME_EXCEL = "application/vnd.ms-excel";
 }
