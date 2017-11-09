@@ -96,6 +96,22 @@ public class StorageController {
 
         logger.debug("Incomming REST request getExcel with name={} DONE!", name);
     }
+    
+    @RequestMapping(value = "/get/{name:.+}", method = RequestMethod.GET)
+    // :.+ 解决 .wav 扩展名问题
+    public void get(
+            @PathVariable String name,
+            @RequestParam(required = false) String contentType,
+            HttpServletResponse resp) {
+
+        logger.debug("Incomming REST request getExcel with name={}", name);
+        String ext = getExt(name);
+        contentType = StorageConstant.MimetypesFileTypeMap.get(ext);
+        retrieveBinaryContent(resp, contentType, name, false);
+
+        logger.debug("Incomming REST request getExcel with name={} DONE!", name);
+    }
+    
     /**
      * http://localhost:9080/storage/storage/audio/0bfdf0fa03e6e53779171f5931b19d4e.wav
      * 
@@ -121,12 +137,18 @@ public class StorageController {
     public Map<String,String> uploadImage(@RequestParam("name") String name,
             @RequestParam("file") MultipartFile file, @RequestParam(value = "contentType", required = false) String contentType) {
     	Map<String,String> map = new HashMap<String,String>();
+    	String ext = "";
     	if(StringUtils.isEmpty(contentType)) {
-    		contentType = file.getContentType();
+    		String originalFilename=file.getOriginalFilename();
+    		ext = getExt(originalFilename);
+    		contentType = StorageConstant.MimetypesFileTypeMap.get(ext);
+    		if(StringUtils.isEmpty(contentType)) {
+    			contentType = StorageConstant.MimetypesFileTypeMap.get(".*");
+    		}
     	}
     	
     	if(StringUtils.isEmpty(name)) {
-    		name = sdf.format(System.currentTimeMillis()).concat(UUID.randomUUID().toString().replaceAll("\\-", ""));
+    		name = sdf.format(System.currentTimeMillis()).concat(UUID.randomUUID().toString().replaceAll("\\-", "")).concat(ext);
     	}
     	
         logger.debug("Incomming REST request uploadImage with name={}", name);
@@ -146,7 +168,7 @@ public class StorageController {
             map.put("status", "00000000");
             map.put("message", "上传成功");
             map.put("name", name);
-            map.put("url", "http://photo.greathiit.com/image/".concat(name));
+            map.put("url", "http://photo.greathiit.com/get/".concat(name));
             return map;
 
         } else {
@@ -229,4 +251,15 @@ public class StorageController {
         }
 
     }
+    
+    private String getExt(String filename) {   
+        if ((filename != null) && (filename.length() > 0)) {   
+            int dot = filename.lastIndexOf('.');   
+            if ((dot >-1) && (dot < (filename.length() - 1))) {   
+                return filename.substring(dot);   
+            }   
+        }   
+        return filename;   
+    }  
+   
 }
